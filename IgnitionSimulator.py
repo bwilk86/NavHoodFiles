@@ -34,14 +34,19 @@ def StopEngineThenTurnAccessoriesOn:
 		GPIO.output(acc_pin, 1)
 	else 
 		print "Car already stopped, start car first"
+def Shutdown:
+    GPIO.cleanup()
+    
 try:
-	while True:
-		ignition_input = input("Start/Stop/Interrupt/StopAcc")
-		if(ignition_input.lower == "start")
-			NormalStartCar()
-		elif(ignition_input.lower == "stop")
-			NormalStopCar()
-		elif((ignition_input.lower == "interrupt")
-			InterruptedStartCar()
-		elif(ignition_input.lower == "stopacc")
-			StopEngineThenTurnAccessoriesOn()
+    while True:
+	ignition_input = input("Start/Stop/Interrupt/StopAcc")
+	if(ignition_input.lower == "start")
+            NormalStartCar()
+	elif(ignition_input.lower == "stop")
+            NormalStopCar()
+	elif(ignition_input.lower == "interrupt")
+            InterruptedStartCar()
+	elif(ignition_input.lower == "stopacc")
+            StopEngineThenTurnAccessoriesOn()
+except KeyboardInterrupt:
+                     Shutdown()
