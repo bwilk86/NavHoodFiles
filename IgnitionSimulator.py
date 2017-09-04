@@ -37,4 +37,11 @@ def StopEngineThenTurnAccessoriesOn:
 try:
 	while True:
 		ignition_input = input("Start/Stop/Interrupt/StopAcc")
-		
+		if(ignition_input.lower == "start")
+			NormalStartCar()
+		elif(ignition_input.lower == "stop")
+			NormalStopCar()
+		elif((ignition_input.lower == "interrupt")
+			InterruptedStartCar()
+		elif(ignition_input.lower == "stopacc")
+			StopEngineThenTurnAccessoriesOn()
