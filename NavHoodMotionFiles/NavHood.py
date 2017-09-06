@@ -1,5 +1,6 @@
 import RPi.GPIO as GPIO
 import time
+import os
 
 #variables
 curDirection = True
@@ -9,15 +10,19 @@ buttonDelay = .4
 filePath = '/home/pi/Desktop/MotorController/NavHoodRestorePosition'
 
 #GPIO 
-GPIO.setmode(GPIO.BOARD)
+GPIO.setmode(GPIO.BCM)
 
 #GPIO input pins
-accPin = 16
-tiltPin = 12
-openPin = 15
+#accPin = 23#12
+sleepyPiInputPin = 24
+sleepyPiOutputPin = 25
+tiltPin = 18#12
+openPin = 22#15
 
 #GPIO input setup
-GPIO.setup(accPin,GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+#GPIO.setup(accPin,GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(sleepyPiInputPin,GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(sleepyPiOutputPin,GPIO.OUT,pull_up_down=GPIO.PUD_UP)
 GPIO.setup(tiltPin,GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 GPIO.setup(openPin,GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
@@ -134,12 +139,13 @@ def ShutDown():
     motor_en.stop()
     motor_en.ChangeDutyCycle(0)
     GPIO.cleanup()
+    os.system("sudo shutdown -h now")
     
 try:
     InitializeHood()
 
     #run while the accessories are on
-    while GPIO.input(accPin) == True:
+    while GPIO.input(sleepyPiInputPin) != True:
         
         #Open button is pressed
         if GPIO.input(openPin) == True:
