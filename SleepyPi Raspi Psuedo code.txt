@@ -1,0 +1,123 @@
+Loop{
+	if(acc_pin == high)
+	{
+		if(Raspi_Power_on == true)
+		{
+			wait 1 second
+		}
+		else
+		{
+			if(Time_since_pin_high > 10)
+			{
+				Start Raspberry Pi
+				Set Time_since_pin_high = 0
+				Set Time_since_pin_low = 0
+				Set Raspi_Power_on = true
+			}
+		}
+	}
+	else if (acc_pin == low)
+	{
+		if (Raspi_Power_on == false)
+		{
+			wait 1 second
+		}
+		else
+		{
+			if(Time_since_pin_low > 10)
+			{
+				Issue Shutdown command
+				Set Time_since_pin_high = 0
+				Set Time_since_pin_low = 0
+				Set Raspi_Power_on = false
+			}
+		}
+	}
+}
+//Written as total loop
+MainProgLoop
+{
+	while (GetRaspiPowerState())
+	{
+		wait 10 seconds
+		
+		if(GetRaspiPowerState())
+		{
+			wait 1 second
+		}
+		else if (GetAccPinState())
+		{
+			StartRaspi();
+		}
+	}
+	while(!GetRaspiPowerState())
+	{
+		wait 10 seconds
+		
+		if(!GetRaspiPowerState())
+		{
+			wait 1 second
+		}
+		else if (!GetAccPinState())
+		{
+			StopRaspi(); 
+		}
+	}
+}
+bool GetAccPinState()
+{
+	if (acc_pin high)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+bool GetRaspiPowerState()
+{
+	if(Raspi power on)
+	{
+		return true
+	}
+	else
+	{
+		return false
+	}
+}
+void StopRaspi()
+{
+	int i = 0
+	issue shutdown
+	wait 20 seconds
+	if(GetRaspiPowerState())
+	{
+		StopRaspiHard();
+	}
+}
+void StopRaspiHard()
+{
+	issue kill power command
+}
+
+void StartRaspi()
+{
+	int i = 0
+	power raspi
+	wait 20 seconds
+}
+
+Starting
+	Turn ignition on 
+		-accessories comes on Pin to high
+	Turn to start
+		-accessories turns off pin to low
+	Car starts (10 seconds)?
+		-Accessories come back on pin to high
+	Start Raspi
+	Enter Running loop while Accessories high
+running 
+	While Accessories on, wait
+shutdown
+	Detect
