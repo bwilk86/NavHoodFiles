@@ -62,7 +62,7 @@ def Shutdown():
 blah = True;  
 try:
     while blah:
-            ignition_input = input("Start - Stop - Interrupt - StopAcc - QStart - QStop: \n")
+            ignition_input = input("Start - Stop - Interrupt - StopAcc - QStart - QStop - Exit: \n")
             if ignition_input.lower()=="start":
                 NormalStartCar()
                 print(GPIO.input(acc_pin))
