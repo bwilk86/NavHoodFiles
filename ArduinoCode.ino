@@ -55,11 +55,11 @@ void loop()
     PCintPort::attachInterrupt(WAKEUP_PIN, &wakeup_isr, FALLING);  
 
     // Enter power down state with ADC and BOD module disabled.
-    // Wake up when wake up pin is low.
-	if(SleepyPi.enablePiPower(true)
+    // Shutdown when wake up pin is low.
+	if(SleepyPi.enablePiPower(true))
 	{
 		delay(10000);
-		if(digitalRead(WAKEUP_PIN, LOW)
+		if(digitalRead(WAKEUP_PIN, LOW))
 		{
 			SleepyPi.powerDown(SLEEP_FOREVER, ADC_OFF, BOD_OFF); 
 			delay(5000);
@@ -79,7 +79,7 @@ void loop()
 	if(SleepyPi.enablePiPower(false)
 	{
 		delay(10000);
-		if(digitalRead(WAKEUP_PIN, LOW)
+		if(digitalRead(WAKEUP_PIN, HIGH))
 		{		
 			SleepyPi.enablePiPower(true);
 			SleepyPi.enableExtPower(true)
