@@ -144,7 +144,7 @@ def ShutDown():
 try:
     InitializeHood()
 
-    #run while the accessories are on
+    #run while the SleepyPi is telling us to be on
     while GPIO.input(sleepyPiInputPin) != True:
         
         #Open button is pressed
