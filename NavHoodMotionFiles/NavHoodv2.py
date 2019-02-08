@@ -37,31 +37,33 @@ GPIO.setup(motor_dir, GPIO.OUT)
 motor_en = GPIO.PWM(motor_en_pin, 200)
 
 
-def position_hood(current_pos, go_to_pos):
+def position_hood(start_pos, go_to_pos):
     # Determine how to position the hood
-    print ("Current Position: ", current_pos)
-    print ("Go To Position: ", go_to_pos)
+    print("Current Position: ", start_pos)
+    print("Go To Position: ", go_to_pos)
 
     full_hood_sweep = 3.5
     quarter_hood_sweep = full_hood_sweep / 4
     eighth_hood_sweep = full_hood_sweep / 8
+    motor_run_time = 0
 
     # Fully Closing the hood FROM any position
     if go_to_pos == 0:
-        if current_pos == 1:
+        if start_pos == 1:
             motor_run_time = 2 * quarter_hood_sweep + eighth_hood_sweep
-        elif current_pos == 2:
+        elif start_pos == 2:
             motor_run_time = 3 * quarter_hood_sweep
-        elif current_pos == 3:
+        elif start_pos == 3:
             motor_run_time = 3 * quarter_hood_sweep + eighth_hood_sweep
-        elif current_pos == 4:
+        elif start_pos == 4:
             motor_run_time = full_hood_sweep
         move_hood(motor_run_time, not open_direction)
-        current_pos = go_to_pos
-        return current_pos
+        start_pos = go_to_pos
+        return start_pos
 
     # Fully Opening the hood TO any position
-    if current_pos == 0:
+    if start_pos == 0:
+        motor_run_time = 0
         if go_to_pos == 1:
             motor_run_time = 2 * quarter_hood_sweep
         elif go_to_pos == 2:
@@ -71,17 +73,17 @@ def position_hood(current_pos, go_to_pos):
         elif go_to_pos == 4:
             motor_run_time = full_hood_sweep
         move_hood(motor_run_time, open_direction)
-        current_pos = go_to_pos
-        return current_pos
+        start_pos = go_to_pos
+        return start_pos
 
     # Cycling between each of the tilt positions
-    steps = go_to_pos - current_pos
+    steps = go_to_pos - start_pos
     if steps < 0:
-        print ("2")
+        print("2")
         steps = abs(steps)
         move_hood(steps * eighth_hood_sweep, not open_direction)
     elif steps > 0:
-        print ("3")
+        print("3")
         move_hood(steps * eighth_hood_sweep, True)
     else:
         return
@@ -102,8 +104,7 @@ def set_restore_position_from_file():
 
     position_file = open(filePath, 'r')
     stored_pos = position_file.readline()
-    restore_pos = int(stored_pos)
-    return restore_pos
+    return int(stored_pos)
 
 
 def initialize_hood():
@@ -111,12 +112,12 @@ def initialize_hood():
     # then move the hood to the last stored point
 
     move_hood(3.5, not open_direction)
-    resore_pos = set_restore_position_from_file()
-    current_pos = position_hood(0, restore_pos)  # type: int
-    return current_pos
+    stored_pos = set_restore_position_from_file()
+    open_to_pos = position_hood(0, stored_pos)  # type: int
+    return open_to_pos, stored_pos
 
 
-def store_restore_position(current_pos):
+def store_restore_position(pos_to_store):
     # stores the current position of the hood to a position_file.
     # Used to retain the hood position from last use/shutdown of vehicle.
     # commented lines are for the option of always storing the current position,
@@ -126,14 +127,14 @@ def store_restore_position(current_pos):
 
     position_file = open(filePath, 'w')
     # position_file.write(str(restorePos))
-    position_file.write(str(current_pos))
+    position_file.write(str(pos_to_store))
 
 
-def shutdown(current_pos):
+def shutdown(pos_to_store):
     # function to occur when the ignition pin is turned off
     global motor_en
     move_hood(3.5, False)
-    store_restore_position(current_pos)
+    store_restore_position(pos_to_store)
     motor_en.stop()
     motor_en.ChangeDutyCycle(0)
     GPIO.cleanup()
@@ -141,10 +142,8 @@ def shutdown(current_pos):
 
 
 try:
-    restore_pos = 0
-    current_pos = 0
 
-    current_pos = initialize_hood()
+    current_pos, restore_pos = initialize_hood()
 
     # run while the SleepyPi is telling us to be on
     while not GPIO.input(sleepyPiInputPin):
@@ -176,6 +175,6 @@ try:
                 current_pos = position_hood(current_pos, goTo)
             time.sleep(buttonDelay)
     shutdown(current_pos)
-    print ("Exiting loop, performing cleanup")
+    print("Exiting loop, performing cleanup")
 except KeyboardInterrupt:
-    shutdown()
+    shutdown(0)
