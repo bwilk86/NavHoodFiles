@@ -122,7 +122,6 @@ def store_restore_position(pos_to_store):
     # Used to retain the hood position from last use/shutdown of vehicle.
     # commented lines are for the option of always storing the current position,
     # or adding some functionality for optionally storing the restorePos... not sure if useful
-    # global restorePos
     global filePath
 
     position_file = open(filePath, 'w')
