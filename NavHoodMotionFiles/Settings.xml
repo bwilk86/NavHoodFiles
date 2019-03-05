@@ -1,23 +1,75 @@
 <NavHoodSettings>
 	<Settings>
 		<Pins>
-			<Inputs>
-				<ShutoffSignal>24</ShutoffSignal>
-				<TiltPin>19</TiltPin>
-				<OpenPin>20</OpenPin>
-			</Inputs>
-			<Output>
-				<PowerSignal>25</PowerSignal>
-				<MotorEnabled>21</MotorEnabled>
-				<MotorDirection>26</MotorDirection>
-			</Output>
-		</Pins>
-		<DefaultValues>
-			<OpenDirection>True</OpenDirection>
-			<ButtonDelay>.4</ButtonDelay>
-		</DefaultValues>
+            <Pin name="ShutoffSignal">
+                <Type>Input</Type>
+                <Number>
+                    <BCM>24</BCM>
+                    <Board></Board>
+                </Number>
+            </Pin>
+            <Pin name="TiltPin">
+                <Type>Input</Type>
+                <Number>
+                    <BCM>19</BCM>
+                    <Board></Board>
+                </Number>
+            </Pin>
+            <Pin name="OpenPin">
+                <Type>Input</Type>
+                <Number>
+                    <BCM>20</BCM>
+                    <Board></Board>
+                </Number>
+            </Pin>
+            <Pin name="OpenPin">
+                <Type>Input</Type>
+                <Number>
+                    <BCM>20</BCM>
+                    <Board></Board>
+                </Number>
+            </Pin>
+            <Pin name="PowerSignal">
+                <Type>Output</Type>
+                <Number>
+                    <BCM>25</BCM>
+                    <Board></Board>
+                </Number>
+            </Pin>
+            <Pin name="MotorEnabled">
+                <Type>Output</Type>
+                <Number>
+                    <BCM>21</BCM>
+                    <Board></Board>
+                </Number>
+            </Pin>
+            <Pin name="MotorDirection">
+                <Type>Output</Type>
+                <Number>
+                    <BCM>26</BCM>
+                    <Board></Board>
+                </Number>
+            </Pin>
+        </Pins>
+		<DefaultSettings>
+            <DefaultSetting name="OpenDirection">
+                <Type>Boolean</Type>
+                <Value>True</Value>
+            </DefaultSetting>
+			<DefaultSetting name="ButtonDelay">
+                <Type>Float</Type>
+                <Value>.4</Value>
+            </DefaultSetting>
+		</DefaultSettings>
 		<StoredValues>
-			<RestorePosition>3</RestorePosition>
+            <StoredValue name="RestorePosition">
+                <Type>Integer</Type>
+                <Value>3</Value>
+            </StoredValue>
+			<StoredValue name="HoodOpen">
+                <Type>Boolean</Type>
+                <Value>False</Value>
+            </StoredValue>
 		</StoredValues>
 	</Settings>
 </NavHoodSettings>
