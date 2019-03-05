@@ -1,12 +1,15 @@
 import time
 import os
 import RPi.GPIO as GPIO
+import xml.etree.ElementTree as ET
+
 # variables
 open_direction = True
 currentPos = 3
 restorePos = 3
 buttonDelay = .4
 filePath = '/NavHoodFiles/NavHoodRestorePosition'
+file_name = '/Settings/settings.xml'
 
 # GPIO
 GPIO.setmode(GPIO.BCM)
@@ -36,6 +39,10 @@ GPIO.setup(motor_dir, GPIO.OUT)
 # set motor_en_pin to PWM pin
 motor_en = GPIO.PWM(motor_en_pin, 200)
 
+def load_settings(file_name):
+    tree = ET.parse(file_name)
+    root = tree.getiterator()
+    return root
 
 def position_hood(start_pos, go_to_pos):
     # Determine how to position the hood
@@ -138,6 +145,7 @@ def shutdown(pos_to_store):
 
 
 try:
+    settings = load_settings(file_name)
 
     current_pos, restore_pos = initialize_hood()
 

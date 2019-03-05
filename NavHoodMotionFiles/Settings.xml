@@ -1,0 +1,23 @@
+<NavHoodSettings>
+	<Settings>
+		<Pins>
+			<Inputs>
+				<ShutoffSignal>24</ShutoffSignal>
+				<TiltPin>19</TiltPin>
+				<OpenPin>20</OpenPin>
+			</Inputs>
+			<Output>
+				<PowerSignal>25</PowerSignal>
+				<MotorEnabled>21</MotorEnabled>
+				<MotorDirection>26</MotorDirection>
+			</Output>
+		</Pins>
+		<DefaultValues>
+			<OpenDirection>True</OpenDirection>
+			<ButtonDelay>.4</ButtonDelay>
+		</DefaultValues>
+		<StoredValues>
+			<RestorePosition>3</RestorePosition>
+		</StoredValues>
+	</Settings>
+</NavHoodSettings>
