@@ -146,6 +146,7 @@ def shutdown(pos_to_store):
 
 try:
     settings = load_settings(file_name)
+    #TODO: load settings into local variables
 
     current_pos, restore_pos = initialize_hood()
 
