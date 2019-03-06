@@ -3,46 +3,91 @@ import os
 import RPi.GPIO as GPIO
 import xml.etree.ElementTree as ET
 
+
+# GPIO
+# GPIO.GetMode - 11=BCM, 10=Board
+GPIO.setmode(GPIO.BCM)
+
 # variables
 open_direction = True
-currentPos = 3
-restorePos = 3
-buttonDelay = .4
+currentPos = 0
+
+restorePos = 0
+hoodOpen = False
+
+buttonDelay: float = .4
 filePath = '/NavHoodFiles/NavHoodRestorePosition'
 file_name = '/Settings/settings.xml'
 
-# GPIO
-GPIO.setmode(GPIO.BCM)
-
 # GPIO input pins
 # accPin = 23#12
-sleepyPiInputPin = 24
-sleepyPiOutputPin = 25
+shutoffSignal = 24
+powerSignal = 25
 tiltPin = 19  # 12
 openPin = 20  # 15
-
-# GPIO input setup
-# GPIO.setup(accPin,GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-GPIO.setup(sleepyPiInputPin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-GPIO.setup(sleepyPiOutputPin, GPIO.OUT, initial=GPIO.HIGH)
-GPIO.setup(tiltPin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-GPIO.setup(openPin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-
 # GPIO output pins
 motor_en_pin = 21  # 11
 motor_dir = 26  # 13
 
-# GPIO output setup
-GPIO.setup(motor_en_pin, GPIO.OUT)
-GPIO.setup(motor_dir, GPIO.OUT)
 
-# set motor_en_pin to PWM pin
-motor_en = GPIO.PWM(motor_en_pin, 200)
+def set_program_variables(settings_element_tree):
+    global open_direction, \
+        restorePos, buttonDelay, file_name, \
+        shutoffSignal, powerSignal, tiltPin, \
+        openPin, motor_en_pin, motor_dir, hoodOpen
 
-def load_settings(file_name):
-    tree = ET.parse(file_name)
+    # set the board mode to assign variables
+    mode = ""
+    if GPIO.getmode() == 11:
+        mode = "BCM"
+    else:
+        mode = "Board"
+    for pin in settings_element_tree.Settings.iter("Pins"):
+        if pin.Name == "ShutoffSignal":
+            shutoffSignal = pin.Number.get(mode)
+        elif pin.Name == "TiltPin":
+            tiltPin = pin.Number.get(mode)
+        elif pin.Name == "OpenPin":
+            openPin = pin.Number.get(mode)
+        elif pin.Name == "PowerSignal":
+            powerSignal = pin.Number.get(mode)
+        elif pin.Name == "MotorEnabled":
+            motor_en_pin = pin.Number.get(mode)
+        elif pin.Name == "MotorDirection":
+            motor_dir = pin.Number.get(mode)
+
+    for defSetting in settings_element_tree.Settings.iter("DefaultSettings"):
+        if defSetting.name == "OpenDirection":
+            open_direction = defSetting.Value
+        elif defSetting.name == "ButtonDelay":
+            buttonDelay = defSetting.Value
+
+    for storedValue in settings_element_tree.Settings.iter("StoredValue"):
+        if storedValue.name == "RestorePosition":
+            restorePos = storedValue.Value
+        elif storedValue.name == "HoodOpen":
+            hoodOpen = storedValue.Value
+
+
+def set_pin_directions():
+    # GPIO input setup
+    # GPIO.setup(accPin,GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+    GPIO.setup(shutoffSignal, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+    GPIO.setup(powerSignal, GPIO.OUT, initial=GPIO.HIGH)
+    GPIO.setup(tiltPin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+    GPIO.setup(openPin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+
+    # GPIO output setup
+    GPIO.setup(motor_en_pin, GPIO.OUT)
+    GPIO.setup(motor_dir, GPIO.OUT)
+    # set motor_en_pin to PWM pin
+
+
+def load_settings_from_file(file_name_string):
+    tree = ET.parse(file_name_string)
     root = tree.getiterator()
     return root
+
 
 def position_hood(start_pos, go_to_pos):
     # Determine how to position the hood
@@ -114,14 +159,17 @@ def set_restore_position_from_file():
     return int(stored_pos)
 
 
-def initialize_hood():
+def initialize_hood(restore_position, hood_open):
     # ensure that the hood is first closed, then set the restore position from a file,
     # then move the hood to the last stored point
+    # int, bool
 
     move_hood(3.5, not open_direction)
-    stored_pos = set_restore_position_from_file()
-    open_to_pos = position_hood(0, stored_pos)  # type: int
-    return open_to_pos, stored_pos
+    if hood_open:
+        open_to_pos = position_hood(0, restore_position)
+        return open_to_pos # type: int
+    else:
+        return 0
 
 
 def store_restore_position(pos_to_store):
@@ -145,13 +193,19 @@ def shutdown(pos_to_store):
 
 
 try:
-    settings = load_settings(file_name)
-    #TODO: load settings into local variables
+    # TODO: write file write for XML settings for booting
+    settings = load_settings_from_file(file_name)
 
-    current_pos, restore_pos = initialize_hood()
+    set_program_variables(settings)
+
+    set_pin_directions()
+    # set motor_en_pin to PWM pin
+    motor_en = GPIO.PWM(motor_en_pin, 200)
+
+    current_pos = initialize_hood(restore_pos, hoodOpen)
 
     # run while the SleepyPi is telling us to be on
-    while not GPIO.input(sleepyPiInputPin):
+    while not GPIO.input(shutoffSignal):
 
         # Open button is pressed
         if GPIO.input(openPin):
