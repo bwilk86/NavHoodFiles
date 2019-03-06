@@ -86,7 +86,7 @@ def set_pin_directions():
 def load_settings_from_file(file_name_string):
     tree = ET.parse(file_name_string)
     root = tree.getiterator()
-    return root
+    return tree, root
 
 
 def position_hood(start_pos, go_to_pos):
@@ -181,11 +181,21 @@ def store_restore_position(pos_to_store):
     position_file.write(str(pos_to_store))
 
 
-def shutdown(pos_to_store):
+def shutdown(element_tree, root, current_position, restore_position):
     # function to occur when the ignition pin is turned off
-    global motor_en
+    global motor_en, file_name
+
+    for stored_value in root.StoredValues:
+        if stored_value.name == "HoodOpen":
+            if int(current_position) == 0:
+                stored_value.Value = False
+            else:
+                stored_value.Value = True
+        elif stored_value.name == "RestorePosition":
+            stored_value.Value = int(restore_position)
+
     move_hood(3.5, False)
-    store_restore_position(pos_to_store)
+    element_tree.write(file_name)
     motor_en.stop()
     motor_en.ChangeDutyCycle(0)
     GPIO.cleanup()
@@ -194,7 +204,7 @@ def shutdown(pos_to_store):
 
 try:
     # TODO: write file write for XML settings for booting
-    settings = load_settings_from_file(file_name)
+    tree, settings = load_settings_from_file(file_name)
 
     set_program_variables(settings)
 
@@ -233,7 +243,7 @@ try:
                 goTo = currentPos - 1
                 current_pos = position_hood(current_pos, goTo)
             time.sleep(buttonDelay)
-    shutdown(current_pos)
+    shutdown(tree, settings, current_pos, restore_pos, hoodOpen)
     print("Exiting loop, performing cleanup")
 except KeyboardInterrupt:
     shutdown(0)
