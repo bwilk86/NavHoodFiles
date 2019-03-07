@@ -121,3 +121,18 @@ running
 	While Accessories on, wait
 shutdown
 	Detect
+
+
+
+
+pseudo code for moving the motor with an ADC
+
+Move motor(param position to move to)
+
+	begin moving motor
+	while (true):
+		read ADC
+		if ( adc value within range for position)
+			break
+		else
+			wait (.01sec)
