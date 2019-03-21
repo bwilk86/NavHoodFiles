@@ -1,6 +1,8 @@
 import time
 import os
+# noinspection SpellCheckingInspection
 import RPi.GPIO as GPIO
+# noinspection PyPep8Naming
 import xml.etree.ElementTree as ET
 
 
@@ -37,7 +39,6 @@ def set_program_variables(settings_element_tree):
         openPin, motor_en_pin, motor_dir, hoodOpen
 
     # set the board mode to assign variables
-    mode = ""
     if GPIO.getmode() == 11:
         mode = "BCM"
     else:
@@ -84,9 +85,9 @@ def set_pin_directions():
 
 
 def load_settings_from_file(file_name_string):
-    tree = ET.parse(file_name_string)
-    root = tree.getiterator()
-    return tree, root
+    xml_tree = ET.parse(file_name_string)
+    root = xml_tree.getiterator()
+    return xml_tree, root
 
 
 def position_hood(start_pos, go_to_pos):
@@ -167,7 +168,7 @@ def initialize_hood(restore_position, hood_open):
     move_hood(3.5, not open_direction)
     if hood_open:
         open_to_pos = position_hood(0, restore_position)
-        return open_to_pos # type: int
+        return open_to_pos  # type: int
     else:
         return 0
 
@@ -203,7 +204,7 @@ def shutdown(element_tree, root, current_position, restore_position):
 
 
 try:
-    # TODO: write file write for XML settings for booting
+    # TODO: write filewrite for XML settings for booting
     tree, settings = load_settings_from_file(file_name)
 
     set_program_variables(settings)
@@ -212,7 +213,7 @@ try:
     # set motor_en_pin to PWM pin
     motor_en = GPIO.PWM(motor_en_pin, 200)
 
-    current_pos = initialize_hood(restore_pos, hoodOpen)
+    currentPos = initialize_hood(restorePos, hoodOpen)
 
     # run while the SleepyPi is telling us to be on
     while not GPIO.input(shutoffSignal):
@@ -220,30 +221,30 @@ try:
         # Open button is pressed
         if GPIO.input(openPin):
             print("Open button pressed")
-            print("Current Position: ", current_pos)
-            if current_pos == 0:
+            print("Current Position: ", currentPos)
+            if currentPos == 0:
                 GPIO.output(motor_dir, open_direction)
-                current_pos = position_hood(current_pos, restorePos)
-                print("Restoring to position: ", restore_pos)
+                currentPos = position_hood(currentPos, restorePos)
+                print("Restoring to position: ", restorePos)
             else:
-                restore_pos = current_pos
-                print("Closing Hood, setting Restore Position to: ", restore_pos)
-                current_pos = position_hood(current_pos, 0)
+                restorePos = currentPos
+                print("Closing Hood, setting Restore Position to: ", restorePos)
+                currentPos = position_hood(currentPos, 0)
             time.sleep(buttonDelay)
 
         # Tilt button is pressed
         if GPIO.input(tiltPin):
             goTo = 0
-            if current_pos == 0:
+            if currentPos == 0:
                 time.sleep(.05)
-            elif current_pos - 1 == 0:
+            elif currentPos - 1 == 0:
                 goTo = 4
-                current_pos = position_hood(current_pos, goTo)
+                currentPos = position_hood(currentPos, goTo)
             else:
                 goTo = currentPos - 1
-                current_pos = position_hood(current_pos, goTo)
+                currentPos = position_hood(currentPos, goTo)
             time.sleep(buttonDelay)
-    shutdown(tree, settings, current_pos, restore_pos, hoodOpen)
+    shutdown(tree, settings, currentPos, restorePos)
     print("Exiting loop, performing cleanup")
 except KeyboardInterrupt:
-    shutdown(0)
+    shutdown(tree, settings, currentPos, restorePos)
