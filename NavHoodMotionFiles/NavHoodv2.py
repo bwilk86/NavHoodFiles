@@ -17,7 +17,7 @@ currentPos = 0
 restorePos = 0
 hoodOpen = False
 
-buttonDelay: float = .4
+buttonDelay = .4
 filePath = '/NavHoodFiles/NavHoodRestorePosition'
 file_name = '/Settings/settings.xml'
 
@@ -204,7 +204,7 @@ def shutdown(element_tree, root, current_position, restore_position):
 
 
 try:
-    # TODO: write filewrite for XML settings for booting
+    # TODO: write file write for XML settings for booting
     tree, settings = load_settings_from_file(file_name)
 
     set_program_variables(settings)
